@@ -82,7 +82,7 @@ public class MyCoolPackProject_Framework {
     public void link_click(Method method) throws Exception {
         driver.findElement(By.xpath(applnProp.getProperty("QualificationVsvalidation"))).click();
 
-        //screenshot and logging
+        //screenshot and logging//Supposed to be in finally
         String filePath=takeSnapShot(method.getName().toString().trim(),driver);
         test.log(LogStatus.PASS,"Login credentials entered and verified"+test.addScreenCapture(filePath));
     }
