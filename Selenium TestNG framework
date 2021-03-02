@@ -57,8 +57,7 @@ public class MyCoolPackProject_Framework {
 
     @Test
     public void subscribeToNewsletter(Method method) throws Exception {
-        System.out.println(fis);
-        System.out.println(applnProp.getProperty("subscribeEmail"));
+        
         driver.findElement(By.xpath(applnProp.getProperty("subscribeEmail"))).sendKeys("yindhumathi2@gmail.com");
         driver.findElement(By.xpath(applnProp.getProperty("subscribeFirstname"))).sendKeys("Indhumathi");
         driver.findElement(By.xpath(applnProp.getProperty("subscribeLastname"))).sendKeys("Yegappan");
