@@ -70,7 +70,7 @@ public class MyCoolPackProject_Framework {
         sf.assertTrue(verify);
 
 
-        System.out.println(method.getName().toString().trim());
+        
         //incase of selenium webdriver IReporter or TestListener you dont need to pass the driver details
         //as it will automatically trigger/call OnTestFailure if the TC failed/passed
         String filePath=takeSnapShot(method.getName().toString().trim(),driver);
