@@ -1,0 +1,127 @@
+package PropertyFileDemo;
+
+import com.relevantcodes.extentreports.ExtentReports;
+import com.relevantcodes.extentreports.ExtentTest;
+import com.relevantcodes.extentreports.LogStatus;
+import org.apache.commons.io.FileUtils;
+import org.openqa.selenium.By;
+import org.openqa.selenium.OutputType;
+import org.openqa.selenium.TakesScreenshot;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.testng.ITestResult;
+import org.testng.annotations.*;
+import org.testng.asserts.SoftAssert;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.lang.reflect.Method;
+import java.util.Properties;
+import java.util.concurrent.TimeUnit;
+
+public class MyCoolPackProject_Framework {
+    WebDriver driver;
+    ExtentReports reports;
+    ExtentTest test;
+    Properties applnProp; FileInputStream fis;
+
+    @BeforeTest
+    public void browserSetup() throws Exception {
+        //driver setup
+        System.setProperty("webdriver.chrome.driver", "C:\\Users\\ramka\\Downloads\\chromedriver_win32\\chromedriver.exe");
+        driver = new ChromeDriver();
+        driver.get("http://www.coolpack.com/");
+        driver.manage().window().maximize();
+        driver.manage().timeouts().implicitlyWait(50, TimeUnit.SECONDS);
+
+        //propertySetup
+        applnProp=new Properties();
+        System.out.println(System.getProperty("user.dir"));
+        fis=new FileInputStream(System.getProperty("user.dir")+"\\src\\application.properties");
+        applnProp.load(fis);
+
+    }
+
+    @BeforeClass
+    public void reportSetup()
+    {
+        //report setup
+        //ExtentReports(html file path,trur/false)by default it is true and if you give false, then it will
+        //append the reports of previous run testcase along with newly run testcase-meaning it will combine multiple extent reports
+        reports=new ExtentReports(System.getProperty("user.dir")+"\\test-output\\Coolpack_Report.html");
+        test=reports.startTest("MyCoolPackProject_Framework");
+
+    }
+
+    @Test
+    public void subscribeToNewsletter(Method method) throws Exception {
+        System.out.println(fis);
+        System.out.println(applnProp.getProperty("subscribeEmail"));
+        driver.findElement(By.xpath(applnProp.getProperty("subscribeEmail"))).sendKeys("yindhumathi2@gmail.com");
+        driver.findElement(By.xpath(applnProp.getProperty("subscribeFirstname"))).sendKeys("Indhumathi");
+        driver.findElement(By.xpath(applnProp.getProperty("subscribeLastname"))).sendKeys("Yegappan");
+        driver.findElement(By.xpath(applnProp.getProperty("subscribeButton"))).click();
+
+        //Verification
+        SoftAssert sf=new SoftAssert();
+        Boolean verify=driver.findElement(By.xpath(applnProp.getProperty("subscribeSuccessful"))).isDisplayed();
+
+        sf.assertTrue(verify);
+
+
+        System.out.println(method.getName().toString().trim());
+        //incase of selenium webdriver IReporter or TestListener you dont need to pass the driver details
+        //as it will automatically trigger/call OnTestFailure if the TC failed/passed
+        String filePath=takeSnapShot(method.getName().toString().trim(),driver);
+        test.log(LogStatus.PASS,"Login credentials entered and verified"+test.addScreenCapture(filePath));
+
+    }
+
+    @Test
+    public void link_click(Method method) throws Exception {
+        driver.findElement(By.xpath(applnProp.getProperty("QualificationVsvalidation"))).click();
+
+        //screenshot and logging
+        String filePath=takeSnapShot(method.getName().toString().trim(),driver);
+        test.log(LogStatus.PASS,"Login credentials entered and verified"+test.addScreenCapture(filePath));
+    }
+
+    public String takeSnapShot(String method,WebDriver driver) throws Exception {
+        TakesScreenshot scrShot =((TakesScreenshot)driver);
+
+        //Call getScreenshotAs method to create image file
+
+        File SrcFile=scrShot.getScreenshotAs(OutputType.FILE);
+        //Move image file to new destination
+
+        String file=System.getProperty("user.dir")+"\\test-output\\";
+        File DestFile=new File(file+method+".png");
+
+        //Copy file at destination
+
+        FileUtils.copyFile(SrcFile, DestFile);
+
+        //add screenshot to extent report
+        String flpath = DestFile.getAbsolutePath();
+        return  flpath;
+
+    }
+    @AfterMethod
+    public void log(ITestResult result)
+    {
+        if(result.getStatus()==ITestResult.FAILURE)
+        {
+            test.log(LogStatus.FAIL,result.getThrowable());
+        }
+    }
+
+    @AfterClass
+    public void close()
+    {
+        reports.endTest(test);
+        reports.flush();
+        driver.close();
+    }
+}
